@@ -15,7 +15,21 @@
 #define NB_ECRITURES       6 
 
 
-TP3_LRMonitor *MoniteurLR;
+TP3_LRMonitor *moniteurLR;
+
+int fd; // Descriptif partage par tous les threads
+// => les lecteurs partagent ce descriptif et donc la position
+// de lecture dans le fichier
+// Si on veut des lectures indépendantes, ce descriptif doit être local
+// au thread qui fera sa propre ouverture et sa propre fermeture du fichier
+
+/*---------------------------------------------------------------------*/
+void thdErreur(int codeErr, char *msgErr, int valeurErr)) {
+  int *retour = (int *)malloc(sizeof(int));
+  *retour = valeurErr;
+  fprintf(stderr, "%s: %d soit %s \n", msgErr, codeErr, strerror(codeErr));
+  pthread_exit(retour);
+};
 
 
 void *threadLecteur(void *arg) {
@@ -26,7 +40,7 @@ void *threadLecteur(void *arg) {
 
   for (i = 0; i < NB_LECTURES; i++) {
     // Demander a pouvoir acceder en lecture au fichier partage   
-    TP3_LRMonitor::debutLecture(*monNum);
+    moniteurLR->debutLecture(*monNum);
 
     // Se positionner au debut de fichier
     if (lseek(fd, 0, SEEK_SET) < 0)
@@ -46,7 +60,7 @@ void *threadLecteur(void *arg) {
     printf("\n");
 
     // Signaler la fin de l'acces en lecture au fichier partage 
-    TP3_LRMonitor::finLecture(*monNum);
+    moniteurLR->finLecture(*monNum);
     }
   printf ("Lecteur %d, j'ai fini mon execution \n", *monNum);
   pthread_exit(NULL);
@@ -61,7 +75,7 @@ void *threadRedacteur(void *arg) {
 
   for (i = 0; i < NB_ECRITURES; i++) {
     // Demander a pouvoir acceder en ecriture au fichier partage   
-    TP3_LRMonitor::debutEcriture(*monNum);
+    moniteurLR->debutEcriture(*monNum);
 
     // S'appreter a ecrire en fin de fichier
     if (lseek(fd, 0, SEEK_END) < 0)
@@ -75,7 +89,7 @@ void *threadRedacteur(void *arg) {
     printf("Redacteur %d: Ecriture de %c \n", *monNum, monCar);
 
     // Signaler la fin de l'acces en ecriture au fichier partage 
-    TP3_LRMonitor::finEcriture(*monNum);
+    moniteurLR->finEcriture(*monNum);
     }
   printf ("Redacteur %d, j'ai fini mon execution \n", *monNum);
   pthread_exit(NULL);
@@ -104,6 +118,9 @@ int main(int argc, char*argv[]) {
   nbRedacteurs = atoi(argv[2]);
   if (nbRedacteurs > NB_MAX_REDACTEURS)
     nbRedacteurs = NB_MAX_REDACTEURS;
+    
+  
+  moniteurLR = new TP3_LRMonitor();
 
   /* Creation du fichier partage */
   if ((fd = open("LectRed_shared", O_RDWR|O_CREAT, 0666)) < 0) {
@@ -131,11 +148,11 @@ int main(int argc, char*argv[]) {
   /* Attente de la fin des threads */
   for (i = 0; i < nbLecteurs; i++) 
     if ((etat = pthread_join(lesLecteurs[i], NULL)) != 0)
-      thdErreur(etat, "Join lecteurs", NULL);
+      thdErreur(etat, "Join lecteurs", etat);
 
   for (i = 0; i < nbRedacteurs; i++)
     if ((etat = pthread_join(lesRedacteurs[i], NULL)) != 0)
-      thdErreur(etat, "Join lecteurs", NULL);
+      thdErreur(etat, "Join lecteurs", etat);
 
   /*  A completer pour assurer la synchronisation souhaitee */
 

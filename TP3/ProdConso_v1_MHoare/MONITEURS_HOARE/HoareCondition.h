@@ -71,8 +71,7 @@ class HoareConditionWithPriority : public HoareConditionBase {
     Semaphore *semCondition;
     // Nombre de threads en attente par priorite
     unsigned *nbWaitingByPriority;
-    // Nombre total en attente
-    unsigned nbWaiting;
+    
     // Nombre de priorites 
     unsigned nbPriorities;
     

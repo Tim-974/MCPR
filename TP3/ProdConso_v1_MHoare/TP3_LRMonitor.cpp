@@ -12,6 +12,8 @@
 #include <pthread.h>
 #include <stdbool.h>
 
+#include "PCMonitorV1.h"
+
 #define NB_MAX_LECTEURS   10 
 #define NB_MAX_REDACTEURS 10 
 #define NB_LECTURES        5 
@@ -23,78 +25,62 @@ int nbLecteur = 0;
 int nbRedacteurAttente = 0;
 bool redacPresent = false;
 
-pthread_cond_t redacteur = PTHREAD_COND_INITIALIZER;
-pthread_cond_t lecteur = PTHREAD_COND_INITIALIZER;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
-int fd; // Descriptif partage par tous les threads
-// => les lecteurs partagent ce descriptif et donc la position
-// de lecture dans le fichier
-// Si on veut des lectures indépendantes, ce descriptif doit être local
-// au thread qui fera sa propre ouverture et sa propre fermeture du fichier
-
-/*---------------------------------------------------------------------*/
-void thdErreur(int codeErr, char *msgErr, void *codeArret) {
-/*---------------------------------------------------------------------*/
-  fprintf(stderr, "%s: %d soit %s \n", msgErr, codeErr, strerror(codeErr));
-  pthread_exit(codeArret);
+TP3_LRMonitor :: TP3_LRMonitor (){
+	Fifo = newCondition();
 }
+
 
 /*---------------------------------------------------------------------*/
 void debutLecture(int monNum) {
-	pthread_mutex_lock(&mutex);
+	enter();
 	
-	if (redacPresent == true || nbRedacteurAttente > 0){
-		pthread_cond_wait(&lecteur, &mutex);
+	if (redacPresent == true || Fifo.isEmpty == false){
+		Fifo->wait(1);
 	}
 		
 	nbLecteur++;
 	
-	pthread_cond_signal(&lecteur);
+	Fifo->signal();
 	
-	pthread_mutex_unlock(&mutex);
+	leave();
 }
 
 /*---------------------------------------------------------------------*/
 void finLecture(int monNum) {
-	pthread_mutex_lock(&mutex);
+	enter();
 	
 	nbLecteur--;
 	
-	if (nbLecteur ==0)
-		pthread_cond_signal(&redacteur);
+	if (nbLecteur == 0)
+		Fifo->signal();
 	
-	pthread_mutex_unlock(&mutex);
+	leave();
 }
 
 /*---------------------------------------------------------------------*/
 void debutEcriture(int monNum) {
-	pthread_mutex_lock(&mutex);
-	
-	nbRedacteurAttente++;
+	enter();
 	
 	if (redacPresent == true || nbLecteur > 0){
-		pthread_cond_wait(&redacteur, &mutex);
+		Fifo->wait(1);
+	}
+	
+	if (nbLecteur > 0){
+		Fifo->wait(0);
 	}
 	
 	redacPresent = true;
 	
-	nbRedacteurAttente--;
-	
-	pthread_mutex_unlock(&mutex);
+	leave();
 }
 
 void finEcriture(int monNum) {
-	pthread_mutex_lock(&mutex);
+	enter();
 	
 	redacPresent = false;
 	
-	if (nbRedacteurAttente > 0){
-		pthread_cond_signal(&redacteur);
-	}else{
-		pthread_cond_signal(&lecteur);
-	}
+	Fifo->signal();
 	
-	pthread_mutex_unlock(&mutex);
+	leave();
 }
 
