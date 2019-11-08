@@ -24,11 +24,9 @@ int fd; // Descriptif partage par tous les threads
 // au thread qui fera sa propre ouverture et sa propre fermeture du fichier
 
 /*---------------------------------------------------------------------*/
-void thdErreur(int codeErr, char *msgErr, int valeurErr)) {
-  int *retour = (int *)malloc(sizeof(int));
-  *retour = valeurErr;
+void thdErreur(int codeErr, const char *msgErr, void *codeArret) {
   fprintf(stderr, "%s: %d soit %s \n", msgErr, codeErr, strerror(codeErr));
-  pthread_exit(retour);
+  pthread_exit(codeArret);
 };
 
 
@@ -148,11 +146,11 @@ int main(int argc, char*argv[]) {
   /* Attente de la fin des threads */
   for (i = 0; i < nbLecteurs; i++) 
     if ((etat = pthread_join(lesLecteurs[i], NULL)) != 0)
-      thdErreur(etat, "Join lecteurs", etat);
+      thdErreur(etat, "Join lecteurs", NULL);
 
   for (i = 0; i < nbRedacteurs; i++)
     if ((etat = pthread_join(lesRedacteurs[i], NULL)) != 0)
-      thdErreur(etat, "Join lecteurs", etat);
+      thdErreur(etat, "Join lecteurs", NULL);
 
   /*  A completer pour assurer la synchronisation souhaitee */
 

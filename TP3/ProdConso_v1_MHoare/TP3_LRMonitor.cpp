@@ -31,7 +31,7 @@ TP3_LRMonitor :: TP3_LRMonitor (){
 
 
 /*---------------------------------------------------------------------*/
-void debutLecture(int monNum) {
+void TP3_LRMonitor :: debutLecture(int monNum) {
 	enter();
 	
 	if (redacPresent == true || Fifo.isEmpty == false){
@@ -46,7 +46,7 @@ void debutLecture(int monNum) {
 }
 
 /*---------------------------------------------------------------------*/
-void finLecture(int monNum) {
+void TP3_LRMonitor :: finLecture(int monNum) {
 	enter();
 	
 	nbLecteur--;
@@ -58,7 +58,7 @@ void finLecture(int monNum) {
 }
 
 /*---------------------------------------------------------------------*/
-void debutEcriture(int monNum) {
+void TP3_LRMonitor :: debutEcriture(int monNum) {
 	enter();
 	
 	if (redacPresent == true || nbLecteur > 0){
@@ -74,7 +74,7 @@ void debutEcriture(int monNum) {
 	leave();
 }
 
-void finEcriture(int monNum) {
+void TP3_LRMonitor :: finEcriture(int monNum) {
 	enter();
 	
 	redacPresent = false;

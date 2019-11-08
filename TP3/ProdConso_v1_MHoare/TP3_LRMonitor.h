@@ -22,6 +22,9 @@ class TP3_LRMonitor : public HoareMonitor {
 		void debutEcriture(int monNum);
 		void finLecture(int monNum);
 		void finEcriture(int monNum);
+		
+	protected:
+		HoareCondition *Fifo;
 };
 
 #endif
