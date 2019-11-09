@@ -1,19 +1,11 @@
 #ifndef PC_H
 #define PC_H
 
-#include <stdio.h>
-#include <string.h> /* strerror */
-#include <unistd.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <stdbool.h>
-
 #include "MONITEURS_HOARE/HoareMonitor.h"
 #include "MONITEURS_HOARE/HoareCondition.h"
 
 class TP3_LRMonitor : public HoareMonitor {
+	
 	public:
 	
 		TP3_LRMonitor();
@@ -24,7 +16,10 @@ class TP3_LRMonitor : public HoareMonitor {
 		void finEcriture(int monNum);
 		
 	protected:
-		HoareCondition *Fifo;
+	
+		HoareConditionWithPriority *Fifo;
+		int nbLecteur = 0;
+		bool redacPresent = false;
 };
 
 #endif
