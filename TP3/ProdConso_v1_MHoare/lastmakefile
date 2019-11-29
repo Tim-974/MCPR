@@ -22,14 +22,14 @@ LI = List
 # Cible : Dependances
 # Regle de production de la cible (precedee d'une tabulation)
 #
-pcv1 : isoloirs_base.o
-	$(CPP) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) isoloirs_base.o -o pcv1 isoMonitor.o $(REPMH)$(HC).o $(REPMH)$(HM).o $(REPMH)sem.o $(REPMH)$(LI).o $(REPMH)$(ER).o -lpthread
+pcv1 : TP3_LectRedac.o
+	$(CPP) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) TP3_LectRedac.o -o pcv1 TP3_LRMonitor.o $(REPMH)$(HC).o $(REPMH)$(HM).o $(REPMH)sem.o $(REPMH)$(LI).o $(REPMH)$(ER).o -lpthread
 
-isoloirs_base.o : isoloirs_base.cpp isoMonitor.o
+TP3_LectRedac.o : TP3_LectRedac.cpp TP3_LRMonitor.o
 	$(CPP) $(CFLAGS) $(CPPFLAGS) prodConsov1.cpp -c
 
-isoMonitor.o : isoMonitor.cpp $(REPMH)$(HM).o $(REPMH)$(HC).o
-	$(CPP) $(CFLAGS) $(CPPFLAGS) isoMonitor.cpp -c 
+TP3_LRMonitor.o : TP3_LRMonitor.cpp $(REPMH)$(HM).o $(REPMH)$(HC).o
+	$(CPP) $(CFLAGS) $(CPPFLAGS) TP3_LRMonitor.cpp -c 
 
 $(REPMH)$(HM).o : $(REPMH)$(HM).cpp $(REPMH)$(HC).o $(REPMH)$(ER).o $(REPMH)sem.o $(REPMH)$(LI).o
 	$(CPP) $(CFLAGS) $(REPMH)$(HM).cpp -c  -o $(REPMH)$(HM).o
