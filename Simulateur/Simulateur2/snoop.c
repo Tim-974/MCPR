@@ -37,22 +37,12 @@ void cacheSnoopBusRequests(arch_t * arch, int core_num, stats_t * stats){
 				} else if (typeT == BUS_READX) {
 					*modif = 'I';
 					stats->num_invalidations++;
-				}
-				break;
-			 case 'I':
-				if  (typeT == BUS_READ) {
-					*modif = 'I';
-					stats->num_invalidations++;
-				} else if (typeT == BUS_READX) {
-					*modif = 'I';
-					stats->num_invalidations++;
 				} else if (typeT == BUS_READXX) {
 					*modif = 'I';
 					stats->num_invalidations++;
-				} else if (typeT == NONE) {
-					*modif = 'I';
-					stats->num_invalidations++;
-				}
+				}break;
+			 case 'I':
+				
 				break; 
 		}
 	}
