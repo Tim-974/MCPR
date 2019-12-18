@@ -6,7 +6,6 @@ void cacheSnoopBusRequests(arch_t * arch, int core_num, stats_t * stats){
 	//si mon cache est en etat S et ma prochaine requete est BusRDx* et que je lis sur le bus un BusRDx, je dois changer mon BusRDx* en BusRDx
 	int blockNum = arch->bus.current_transaction.block_num;
 	char typeT = arch->bus.current_transaction.type;
-	char * nouveauTypeT = &arch->bus.current_transaction.type;
 	//char etatMonCache = arch->caches[core_num].lines[blockNum].state;
 	char * modif = &arch->caches[core_num].lines[blockNum].state;
 	
@@ -35,19 +34,25 @@ void cacheSnoopBusRequests(arch_t * arch, int core_num, stats_t * stats){
 			case 'S':
 				if  (typeT == BUS_READ) {
 					*modif = 'S';
+					
 				} else if (typeT == BUS_READX) {
-					if (arch->bus.served == core_num && arch->bus.current_transaction.type == BUS_READXX){
+					if (blockNum == arch->caches[core_num].pending_request.block_num 
+							&& arch->caches[core_num].pending_request.type == BUS_READXX){
+								
 						*modif = 'I';
-						*nouveauTypeT = (BUS_READX);
+						arch->caches[core_num].pending_request.type = BUS_READX;
 						stats->num_invalidations++;
 					} else {
 						*modif = 'I';
 						stats->num_invalidations++;
 					}
+					
 				} else if (typeT == BUS_READXX) {
-					if (arch->bus.served == core_num && arch->bus.current_transaction.type == BUS_READXX){
+					if (blockNum == arch->caches[core_num].pending_request.block_num 
+							&& arch->caches[core_num].pending_request.type == BUS_READXX){
+								
 						*modif = 'I';
-						*nouveauTypeT = (BUS_READX);
+						arch->caches[core_num].pending_request.type = BUS_READX;
 						stats->num_invalidations++;
 					} else {
 						*modif = 'I';
